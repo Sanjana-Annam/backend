@@ -1,4 +1,3 @@
-// server.js
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -14,16 +13,17 @@ const app = express();
    MIDDLEWARE
    ----------------------- */
 app.use(express.json());
+
 app.use(
   cors({
-    origin: "*",
+    origin: "*", // Allow all — for development & Railway
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   })
 );
 
 /* -----------------------
-   DEBUG / HEALTH ENDPOINTS
+   HEALTH & DEBUG ROUTES
    ----------------------- */
 app.get("/", (req, res) => {
   res.send("Backend running (root) ✅");
@@ -49,9 +49,12 @@ app.get("/health", (req, res) => {
    ----------------------- */
 app.post("/api/send-otp", async (req, res) => {
   const { email, otp } = req.body;
+
   if (!email || !otp) {
     return res.status(400).json({ message: "email and otp are required" });
   }
+
+  console.log("📩 OTP request received:", { email, otp });
 
   try {
     await sendEmail(
@@ -59,15 +62,16 @@ app.post("/api/send-otp", async (req, res) => {
       "Your WEEP Login OTP",
       `<h2>WEEP Login Verification</h2><p>Your OTP is:</p><h1>${otp}</h1><p>This code is valid for 5 minutes.</p>`
     );
-    res.status(200).json({ message: "OTP sent successfully" });
+
+    return res.status(200).json({ message: "OTP sent successfully" });
   } catch (error) {
-    console.error("OTP send error:", error);
-    res.status(500).json({ message: "Failed to send OTP" });
+    console.error("❌ OTP send error:", error);
+    return res.status(500).json({ message: "Failed to send OTP", error: String(error) });
   }
 });
 
 /* -----------------------
-   PRODUCT (in-memory)
+   PRODUCT UPLOAD
    ----------------------- */
 let products = [];
 
@@ -83,18 +87,22 @@ app.post("/add-product", upload.single("image"), uploadToCloudinary, (req, res) 
       image: req.file ? req.file.path : null,
       createdAt: new Date().toISOString(),
     };
+
     products.push(product);
-    res.status(201).json({ message: "Product uploaded successfully", product });
+
+    return res.status(201).json({ message: "Product uploaded successfully", product });
   } catch (error) {
-    console.error("Upload error:", error);
-    res.status(500).json({ message: "Upload failed" });
+    console.error("❌ Upload error:", error);
+    return res.status(500).json({ message: "Upload failed", error: String(error) });
   }
 });
 
-app.get("/products", (req, res) => res.json(products));
+app.get("/products", (req, res) => {
+  res.json(products);
+});
 
 /* -----------------------
-   START SERVER (Railway)
+   START SERVER  (Railway-safe)
    ----------------------- */
 console.log(
   "Loaded env ->",
@@ -104,23 +112,8 @@ console.log(
 );
 
 const PORT = process.env.PORT || 5000;
-const server = app.listen(PORT, "0.0.0.0", () =>
-  console.log(`🚀 Server is running on port ${PORT}`)
+app.listen(PORT, "0.0.0.0", () =>
+  console.log(`🚀 Server running on port ${PORT}`)
 );
-
-/* -----------------------
-   GRACEFUL SHUTDOWN
-   ----------------------- */
-const shutdown = (signal) => {
-  console.log(`\nReceived ${signal}, shutting down...`);
-  server.close(() => {
-    console.log("Closed connections. Exiting.");
-    process.exit(0);
-  });
-  setTimeout(() => process.exit(1), 10000);
-};
-
-process.on("SIGTERM", () => shutdown("SIGTERM"));
-process.on("SIGINT", () => shutdown("SIGINT"));
 
 export default app;
