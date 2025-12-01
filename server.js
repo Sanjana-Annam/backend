@@ -110,11 +110,20 @@ console.log(
   "API_KEY:", !!process.env.CLOUDINARY_API_KEY,
   "EMAIL_USER:", !!process.env.EMAIL_USER
 );
+/* -----------------------
+   START SERVER
+   ----------------------- */
 
-const PORT = process.env.PORT;
+const PORT = process.env.PORT; // ❗ No fallback here
+if (!PORT) {
+  console.error("❌ Railway PORT env variable not found");
+  process.exit(1);
+}
+
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
+
 
 
 
