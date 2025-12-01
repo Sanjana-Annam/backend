@@ -117,13 +117,11 @@ console.log(
 /* -----------------------
    START SERVER (Railway)
    ----------------------- */
+/* -----------------------
+   START SERVER (Railway)
+   ----------------------- */
 
 const PORT = process.env.PORT;
-if (!PORT) {
-  console.error("❌ PORT is missing from environment");
-  process.exit(1);
-}
-
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`🚀 Server running on PORT=${PORT}`);
 });
