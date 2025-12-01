@@ -106,7 +106,7 @@ app.get("/products", (req, res) => {
 /* -----------------------
    START SERVER (Railway-friendly)
    ----------------------- */
-const PORT = process.env.PORT || 8080;
+
 
 // Debug (do not print secrets)
 console.log(
@@ -120,9 +120,9 @@ console.log(
 );
 
 // Listen on the port Railway provides and bind to 0.0.0.0
-const server = app.listen(PORT, "0.0.0.0", () => {
-  console.log(`🚀 Backend running on PORT ${PORT} (0.0.0.0) — ready`);
-});
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
+
 
 /* -----------------------
    GRACEFUL SHUTDOWN HANDLERS
