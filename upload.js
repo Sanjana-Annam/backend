@@ -5,7 +5,7 @@ import { v2 as cloudinary } from "cloudinary";
 import multer from "multer";
 
 // Debug
-console.log("Cloudinary ENV =>", process.env.CLOUD_NAME, process.env.CLOUD_API_KEY);
+console.log("Cloudinary ENV =>", process.env.CLOUDINARY_CLOUD_NAME, process.env.CLOUDINARY_API_KEY);
 
 // Configure Cloudinary
 cloudinary.config({
@@ -14,28 +14,33 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-
-// Use MULTER MEMORY STORAGE first
+// Multer — store file in memory (buffer)
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-// Custom middleware to upload to cloudinary manually
+// Upload to Cloudinary
 export const uploadToCloudinary = async (req, res, next) => {
   try {
     if (!req.file) return next();
 
-    const b64 = req.file.buffer.toString("base64");
-    const dataURI = "data:" + req.file.mimetype + ";base64," + b64;
+    const base64String = req.file.buffer.toString("base64");
+    const dataURI = `data:${req.file.mimetype};base64,${base64String}`;
 
-    const result = await cloudinary.uploader.upload(dataURI, {
+    const uploadResponse = await cloudinary.uploader.upload(dataURI, {
       folder: "weep-products",
     });
 
-    req.file.path = result.secure_url;
+    // save URL to file path so controller can use it
+    req.file.path = uploadResponse.secure_url;
+
     next();
+
   } catch (error) {
     console.error("Cloudinary upload error:", error);
-    res.status(500).json({ message: "Upload failed", error });
+    return res.status(500).json({
+      message: "Image upload failed",
+      error: error.message
+    });
   }
 };
 
