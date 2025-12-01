@@ -114,15 +114,20 @@ console.log(
    START SERVER
    ----------------------- */
 
-const PORT = process.env.PORT; // ❗ No fallback here
+/* -----------------------
+   START SERVER (Railway)
+   ----------------------- */
+
+const PORT = process.env.PORT;
 if (!PORT) {
-  console.error("❌ Railway PORT env variable not found");
+  console.error("❌ PORT is missing from environment");
   process.exit(1);
 }
 
 app.listen(PORT, "0.0.0.0", () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`🚀 Server running on PORT=${PORT}`);
 });
+
 
 
 
