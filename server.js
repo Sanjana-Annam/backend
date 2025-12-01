@@ -68,6 +68,10 @@ app.post("/add-product", upload.single("image"), uploadToCloudinary, (req, res) 
 
 // Get products
 app.get("/products", (req, res) => res.json(products));
+app.get("/api/test", (req, res) => {
+  res.send("Backend working successfully!");
+});
+
 const PORT = process.env.PORT || 8080;
 
 app.listen(PORT, () => {
