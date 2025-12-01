@@ -1,4 +1,4 @@
-// server.js — Clean, final, Railway-ready version
+// server.js
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -14,8 +14,6 @@ const app = express();
    MIDDLEWARE
    ----------------------- */
 app.use(express.json());
-
-// CORS - during development allow all (tighten in production)
 app.use(
   cors({
     origin: "*",
@@ -27,17 +25,14 @@ app.use(
 /* -----------------------
    DEBUG / HEALTH ENDPOINTS
    ----------------------- */
-// Basic root
 app.get("/", (req, res) => {
   res.send("Backend running (root) ✅");
 });
 
-// Simple test
 app.get("/api/test", (req, res) => {
   res.json({ ok: true, message: "Backend working successfully!" });
 });
 
-// Railway-specific quick check
 app.get("/health", (req, res) => {
   res.json({
     status: "ok",
@@ -58,23 +53,21 @@ app.post("/api/send-otp", async (req, res) => {
     return res.status(400).json({ message: "email and otp are required" });
   }
 
-  console.log("📩 OTP request received:", { email, otp });
-
   try {
     await sendEmail(
       email,
       "Your WEEP Login OTP",
       `<h2>WEEP Login Verification</h2><p>Your OTP is:</p><h1>${otp}</h1><p>This code is valid for 5 minutes.</p>`
     );
-    return res.status(200).json({ message: "OTP sent successfully" });
+    res.status(200).json({ message: "OTP sent successfully" });
   } catch (error) {
-    console.error("❌ OTP send error:", error && (error.message || error));
-    return res.status(500).json({ message: "Failed to send OTP", error: String(error) });
+    console.error("OTP send error:", error);
+    res.status(500).json({ message: "Failed to send OTP" });
   }
 });
 
 /* -----------------------
-   PRODUCT UPLOAD (in-memory)
+   PRODUCT (in-memory)
    ----------------------- */
 let products = [];
 
@@ -90,65 +83,44 @@ app.post("/add-product", upload.single("image"), uploadToCloudinary, (req, res) 
       image: req.file ? req.file.path : null,
       createdAt: new Date().toISOString(),
     };
-
     products.push(product);
-    return res.status(201).json({ message: "Product uploaded successfully", product });
+    res.status(201).json({ message: "Product uploaded successfully", product });
   } catch (error) {
-    console.error("❌ Upload error:", error && error.message ? error.message : error);
-    return res.status(500).json({ message: "Upload failed", error: String(error) });
+    console.error("Upload error:", error);
+    res.status(500).json({ message: "Upload failed" });
   }
 });
 
-app.get("/products", (req, res) => {
-  res.json(products);
-});
+app.get("/products", (req, res) => res.json(products));
 
 /* -----------------------
-   START SERVER (Railway-friendly)
+   START SERVER (Railway)
    ----------------------- */
-
-
-// Debug (do not print secrets)
 console.log(
   "Loaded env ->",
-  "CLOUDINARY_CLOUD_NAME:",
-  !!process.env.CLOUDINARY_CLOUD_NAME,
-  "CLOUDINARY_API_KEY:",
-  !!process.env.CLOUDINARY_API_KEY,
-  "EMAIL_USER:",
-  !!process.env.EMAIL_USER
+  "CLOUDINARY:", !!process.env.CLOUDINARY_CLOUD_NAME,
+  "API_KEY:", !!process.env.CLOUDINARY_API_KEY,
+  "EMAIL_USER:", !!process.env.EMAIL_USER
 );
 
-// Listen on the port Railway provides and bind to 0.0.0.0
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
-
+const server = app.listen(PORT, "0.0.0.0", () =>
+  console.log(`🚀 Server is running on port ${PORT}`)
+);
 
 /* -----------------------
-   GRACEFUL SHUTDOWN HANDLERS
+   GRACEFUL SHUTDOWN
    ----------------------- */
 const shutdown = (signal) => {
-  console.log(`\nReceived ${signal}, shutting down gracefully...`);
-  server.close((err) => {
-    if (err) {
-      console.error("Error during server close:", err);
-      process.exit(1);
-    }
-    console.log("Closed out remaining connections. Exiting.");
+  console.log(`\nReceived ${signal}, shutting down...`);
+  server.close(() => {
+    console.log("Closed connections. Exiting.");
     process.exit(0);
   });
-
-  // force exit after 10s
-  setTimeout(() => {
-    console.error("Forcing shutdown after timeout.");
-    process.exit(1);
-  }, 10000).unref();
+  setTimeout(() => process.exit(1), 10000);
 };
 
 process.on("SIGTERM", () => shutdown("SIGTERM"));
 process.on("SIGINT", () => shutdown("SIGINT"));
 
-/* -----------------------
-   EXPORT (for tests or other use)
-   ----------------------- */
 export default app;
