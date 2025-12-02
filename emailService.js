@@ -4,16 +4,16 @@ dotenv.config();
 
 export const sendEmail = async (to, subject, html) => {
   try {
-    console.log("📌 Nodemailer user =", process.env.EMAIL_USER);
-    console.log("📌 Password loaded =", process.env.EMAIL_PASS ? "Yes" : "No");
+    console.log("📌 EMAIL_USER =", process.env.EMAIL_USER);
+    console.log("📌 EMAIL_PASS =", process.env.EMAIL_PASS ? "Loaded" : "Not Loaded");
 
     const transporter = nodemailer.createTransport({
       host: "smtp.gmail.com",
-      port: 465,
-      secure: true,
+      port: 587,           // better success rate than 465
+      secure: false,       // for port 587
       auth: {
         user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS, // MUST be Gmail App Password
+        pass: process.env.EMAIL_PASS, // must be Gmail App Password
       },
     });
 
@@ -24,11 +24,10 @@ export const sendEmail = async (to, subject, html) => {
       html,
     });
 
-    console.log("📨 OTP Email sent successfully ✔️");
-    console.log("📌 Message ID:", info.messageId);
-    return info;
+    console.log("📨 OTP Email sent successfully");
+    console.log("Message ID:", info.messageId);
   } catch (error) {
-    console.log("❌ Nodemailer Error:", error);
-    throw error; // send error back to server.js
+    console.log("❌ Email sending failed:");
+    console.log(error);
   }
 };
