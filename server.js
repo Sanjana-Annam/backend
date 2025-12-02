@@ -13,17 +13,16 @@ const app = express();
    MIDDLEWARE
    ----------------------- */
 app.use(express.json());
-
 app.use(
   cors({
-    origin: "*", // Allow all — for development & Railway
+    origin: "*",
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   })
 );
 
 /* -----------------------
-   HEALTH & DEBUG ROUTES
+   HEALTH & DEBUG
    ----------------------- */
 app.get("/", (req, res) => {
   res.send("Backend running (root) ✅");
@@ -39,22 +38,19 @@ app.get("/health", (req, res) => {
     env: {
       cloudinary: !!process.env.CLOUDINARY_CLOUD_NAME,
       email_user: !!process.env.EMAIL_USER,
-      port: process.env.PORT || "not-set",
+      port: process.env.PORT,
     },
   });
 });
 
 /* -----------------------
-   OTP EMAIL ENDPOINT
+   OTP EMAIL
    ----------------------- */
 app.post("/api/send-otp", async (req, res) => {
   const { email, otp } = req.body;
-
   if (!email || !otp) {
     return res.status(400).json({ message: "email and otp are required" });
   }
-
-  console.log("📩 OTP request received:", { email, otp });
 
   try {
     await sendEmail(
@@ -62,7 +58,6 @@ app.post("/api/send-otp", async (req, res) => {
       "Your WEEP Login OTP",
       `<h2>WEEP Login Verification</h2><p>Your OTP is:</p><h1>${otp}</h1><p>This code is valid for 5 minutes.</p>`
     );
-
     return res.status(200).json({ message: "OTP sent successfully" });
   } catch (error) {
     console.error("❌ OTP send error:", error);
@@ -89,7 +84,6 @@ app.post("/add-product", upload.single("image"), uploadToCloudinary, (req, res) 
     };
 
     products.push(product);
-
     return res.status(201).json({ message: "Product uploaded successfully", product });
   } catch (error) {
     console.error("❌ Upload error:", error);
@@ -97,38 +91,14 @@ app.post("/add-product", upload.single("image"), uploadToCloudinary, (req, res) 
   }
 });
 
-app.get("/products", (req, res) => {
-  res.json(products);
-});
+app.get("/products", (req, res) => res.json(products));
 
 /* -----------------------
-   START SERVER  (Railway-safe)
+   START SERVER (Railway SAFE)
    ----------------------- */
-console.log(
-  "Loaded env ->",
-  "CLOUDINARY:", !!process.env.CLOUDINARY_CLOUD_NAME,
-  "API_KEY:", !!process.env.CLOUDINARY_API_KEY,
-  "EMAIL_USER:", !!process.env.EMAIL_USER
-);
-/* -----------------------
-   START SERVER
-   ----------------------- */
-
-/* -----------------------
-   START SERVER (Railway)
-   ----------------------- */
-/* -----------------------
-   START SERVER (Railway)
-   ----------------------- */
-
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 8080;
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`🚀 Server running on PORT=${PORT}`);
 });
-
-
-
-
-
 
 export default app;
