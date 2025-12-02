@@ -15,7 +15,7 @@ const transporter = nodemailer.createTransport({
 export const sendOTP = async (email, otp) => {
   try {
     const info = await transporter.sendMail({
-      from: `"WEEP Marketplace" <sanjanaannam95@gmail.com>`, // must be verified in Brevo
+      from: `"BVCOEW" <sanjanaannam87@gmail.com>`, // must be verified in Brevo
       to: email,
       subject: "Your OTP Code",
       html: `
