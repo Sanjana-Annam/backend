@@ -5,8 +5,7 @@ import express from "express";
 import cors from "cors";
 import upload from "./upload.js";
 import { uploadToCloudinary } from "./upload.js";
-import { sendOTP } from "./emailService.js";
-
+import { sendEmail } from "./emailService.js"; // <-- Correct import
 
 const app = express();
 app.use(express.json());
@@ -16,7 +15,7 @@ app.use(
   cors({
     origin: [
       "https://frontend-rk0b.onrender.com", // Render frontend
-      "http://localhost:5173" // React local
+      "http://localhost:5173"               // Local React
     ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
@@ -35,7 +34,7 @@ app.post("/api/send-otp", async (req, res) => {
     return res.status(400).json({ message: "Email & OTP required" });
   }
 
-  console.log(`📩 OTP request received for: ${email} → OTP: ${otp}`);
+  console.log(`📩 OTP request for: ${email} → ${otp}`);
 
   const htmlTemplate = `
     <h2 style="color:#0d6efd">WEEP Login Verification</h2>
@@ -46,11 +45,11 @@ app.post("/api/send-otp", async (req, res) => {
 
   try {
     await sendEmail(email, "Your WEEP Login OTP", htmlTemplate);
-    console.log("📨 OTP Email sent successfully ✔");
+    console.log("📨 OTP sent successfully ✔");
     return res.status(200).json({ message: "OTP sent successfully" });
   } catch (error) {
-    console.log("❌ Error while sending OTP:", error);
-    return res.status(500).json({ message: "OTP sending failed", error });
+    console.log("❌ OTP sending failed:", error);
+    return res.status(500).json({ message: "OTP failed", error });
   }
 });
 
@@ -80,6 +79,7 @@ const PORT = process.env.PORT || 10000;
 
 app.listen(PORT, () => {
   console.log(`🚀 Backend running on PORT ${PORT}`);
-  console.log("📌 EMAIL_USER =", process.env.EMAIL_USER);
-  console.log("📌 EMAIL_PASS =", process.env.EMAIL_PASS ? "Loaded" : "❌ Not Loaded");
+  console.log(`📌 BREVO_USER: ${process.env.BREVO_USER}`);
+  console.log(`📌 BREVO_PASS: ${process.env.BREVO_PASS ? "Loaded" : "❌ NOT Loaded"}`);
+  console.log(`📌 Cloudinary Loaded: ${process.env.CLOUDINARY_CLOUD_NAME ? "✔" : "❌"}`);
 });
