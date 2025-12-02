@@ -65,4 +65,4 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log("Cloudinary ENV =>", process.env.CLOUDINARY_CLOUD_NAME, process.env.CLOUDINARY_API_KEY);
 });
 
-export default app;
+
