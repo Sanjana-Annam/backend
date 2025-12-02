@@ -59,7 +59,7 @@ app.post("/add-product", upload.single("image"), uploadToCloudinary, (req, res) 
 app.get("/products", (req, res) => res.json(products));
 
 /* START SERVER */
-c/* HEALTH CHECK */
+/* HEALTH CHECK */
 app.get("/health", (req, res) => res.status(200).send("OK"));
 app.get("/", (req, res) => res.send("Backend OK"));
 
