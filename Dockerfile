@@ -3,12 +3,11 @@ FROM node:20
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm install --production
+RUN npm install --omit=dev
 
 COPY . .
 
 ENV PORT=8080
 EXPOSE 8080
 
-# Prevent Railway from running "npm start"
-CMD ["node", "server.js"]
+CMD [ "node", "/app/server.js" ]
