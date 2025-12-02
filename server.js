@@ -4,8 +4,11 @@ dotenv.config();
 import express from "express";
 import cors from "cors";
 import upload from "./upload.js";
+
 import { uploadToCloudinary } from "./upload.js";
 import { sendEmail } from "./emailService.js";
+import dotenv from "dotenv";
+dotenv.config();
 
 const app = express();
 app.use(express.json());
