@@ -5,7 +5,8 @@ import express from "express";
 import cors from "cors";
 import upload from "./upload.js";
 import { uploadToCloudinary } from "./upload.js";
-import { sendEmail } from "./emailService.js";
+import { sendOTP } from "./emailService.js";
+
 
 const app = express();
 app.use(express.json());
