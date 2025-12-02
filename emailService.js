@@ -3,12 +3,14 @@ import nodemailer from "nodemailer";
 const transporter = nodemailer.createTransport({
   host: "smtp-relay.brevo.com",
   port: 587,
-  secure: false, // important for Brevo (STARTTLS support)
+  secure: false,
   auth: {
     user: process.env.BREVO_USER,
-    pass: process.env.BREVO_PASS,
+    pass: process.env.BREVO_PASS
   },
+  tls: { rejectUnauthorized: false }
 });
+
 
 export const sendOTP = async (email, otp) => {
   try {
