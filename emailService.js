@@ -12,16 +12,14 @@ const transporter = nodemailer.createTransport({
 export const sendEmail = async (email, subject, html) => {
   try {
     const info = await transporter.sendMail({
-      from: `"WEEP Marketplace" <no-reply@weepsupport.com>`,
+      from: `"WEEP Marketplace" <${process.env.BREVO_USER}>`,   // 💥 Fix
       to: email,
       subject,
       html
     });
 
     console.log("📨 OTP Email sent successfully ✔", info.messageId);
-    return true;
   } catch (error) {
     console.error("❌ OTP Email sending failed →", error);
-    throw error;
   }
 };
