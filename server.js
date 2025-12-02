@@ -59,10 +59,13 @@ app.post("/add-product", upload.single("image"), uploadToCloudinary, (req, res) 
 app.get("/products", (req, res) => res.json(products));
 
 /* START SERVER */
+c/* HEALTH CHECK */
+app.get("/health", (req, res) => res.status(200).send("OK"));
+app.get("/", (req, res) => res.send("Backend OK"));
+
+/* START SERVER */
 const PORT = process.env.PORT || 8080;
-app.listen(PORT, "0.0.0.0", () => {
+app.listen(PORT, () => {
   console.log(`🚀 Server running on PORT=${PORT}`);
   console.log("Cloudinary ENV =>", process.env.CLOUDINARY_CLOUD_NAME, process.env.CLOUDINARY_API_KEY);
 });
-
-
