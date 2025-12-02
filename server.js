@@ -55,17 +55,15 @@ app.post("/add-product", upload.single("image"), uploadToCloudinary, (req, res) 
   products.push(product);
   return res.status(201).json({ message: "Product uploaded", product });
 });
-
 app.get("/products", (req, res) => res.json(products));
 
-/* START SERVER */
-/* HEALTH CHECK */
-app.get("/health", (req, res) => res.status(200).send("OK"));
-app.get("/", (req, res) => res.send("Backend OK"));
+/* KEEP ALIVE / HEALTH CHECK */
+app.get("/", (req, res) => res.send("Backend running 🚀"));
+app.get("/health", (req, res) => res.json({ status: "ok" }));
 
 /* START SERVER */
 const PORT = process.env.PORT || 8080;
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`🚀 Server running on PORT=${PORT}`);
   console.log("Cloudinary ENV =>", process.env.CLOUDINARY_CLOUD_NAME, process.env.CLOUDINARY_API_KEY);
 });
